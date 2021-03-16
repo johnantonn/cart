@@ -1,2 +1,2 @@
 # vfdt
-Efficient Decision Trees Learning (VFDT)
+Efficient Decision Tree Learning (VFDT)
