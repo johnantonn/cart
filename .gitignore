@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# Input and output dirs
+/input
+/output
