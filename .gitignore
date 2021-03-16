@@ -31,6 +31,5 @@
 *.out
 *.app
 
-# Input and output dirs
-/input
-/output
+# Build dir
+*/build
