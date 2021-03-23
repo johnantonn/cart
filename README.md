@@ -1,4 +1,4 @@
-# Very Fast Decision Trees (VFDT)
+# Classification and Regression Trees (CART)
 Efficient Decision Tree Learning
 
 # Disclaimer
