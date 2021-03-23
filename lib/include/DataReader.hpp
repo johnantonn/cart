@@ -35,6 +35,9 @@ class DataReader
     inline const Data& testData() const { return testData_; }
     inline const MetaData& metaData() const { return trainMetaData_; }
 
+    inline const void setBaggingData(Data &data){  backupTrainData_=trainData_; trainData_=data;};
+    inline const void resetBaggingData(){ trainData_=backupTrainData_; backupTrainData_={};};
+
   private:
     void processFile(const std::string& strings, Data& data, MetaData &meta);
     void moveClassDataToBack(VecS &line, const VecS &labels) const;
@@ -46,6 +49,7 @@ class DataReader
 
     const std::string classLabel_;
     Data trainData_;
+    Data backupTrainData_;
     Data testData_;
     MetaData trainMetaData_;
     MetaData testMetaData_;

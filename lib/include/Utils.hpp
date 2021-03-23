@@ -24,6 +24,7 @@ using Data = std::vector<std::vector<std::string>>;
 struct MetaData {
   VecS labels;
   // Here you can store additional meta data
+  VecS types;
 };
 
 

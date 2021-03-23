@@ -13,6 +13,7 @@ using boost::timer::cpu_timer;
 DataReader::DataReader(const Dataset& dataset) :
     classLabel_(dataset.classLabel),
     trainData_({}),
+    backupTrainData_({}),
     testData_({}),
     trainMetaData_({}),
     testMetaData_({}) {
@@ -91,6 +92,7 @@ bool DataReader::parseHeaderLine(const std::string &line, MetaData &meta, bool &
         && strcasecmp(s.substr(s.size() - len, len).c_str(), " NUMERIC") == 0) {
       s = s.substr(0, s.size() - len);
       meta.labels.push_back(s);
+      meta.types.push_back("NUMERIC");
       return true;
     }
 
@@ -99,6 +101,7 @@ bool DataReader::parseHeaderLine(const std::string &line, MetaData &meta, bool &
         && strcasecmp(s.substr(s.size() - len, len).c_str(), " REAL") == 0) {
       s = s.substr(0, s.size() - len);
       meta.labels.push_back(s);
+      meta.types.push_back("REAL");
       return true;
     }
 
@@ -106,6 +109,7 @@ bool DataReader::parseHeaderLine(const std::string &line, MetaData &meta, bool &
       int pos = s.find_last_of("{");
       s = s.substr(0, pos);
       meta.labels.push_back(s);
+      meta.types.push_back("CATEGORICAL");
       return true;
     }
     return true;

@@ -22,12 +22,21 @@ Bagging::Bagging(const DataReader& dr, const int ensembleSize, uint seed) :
 
 void Bagging::buildBag() {
   cpu_timer timer;
-  std::vector<double> timings; 
+  std::vector<double> timings;
+  int N = dr_.trainData().size();
+  std::uniform_int_distribution<int> unii(0, N-1);
   for (int i = 0; i < ensembleSize_; i++) {
     timer.start();
-    //TODO: Implement bagging
-    //   Generate a bootstrap sample of the original data
-    //   Train an unpruned tree model on this sample
+    Data data;
+    int count = N;
+    while(count-- > 0){
+      data.emplace_back(dr_.trainData()[unii(random_number_generator)]);
+    }
+    dr_.setBaggingData(data);
+    DecisionTree dt(dr_);
+    //dt.print();
+    learners_.push_back(dt);
+    dr_.resetBaggingData();
     auto nanoseconds = boost::chrono::nanoseconds(timer.elapsed().wall);
     auto seconds = boost::chrono::duration_cast<boost::chrono::seconds>(nanoseconds);
     timings.push_back(seconds.count());

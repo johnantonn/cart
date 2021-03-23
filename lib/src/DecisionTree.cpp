@@ -5,6 +5,7 @@
  */
 
 #include "DecisionTree.hpp"
+#include "Calculations.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -17,15 +18,18 @@ DecisionTree::DecisionTree(const DataReader& dr) : root_(Node()), dr_(dr) {
   std::cout << "Done. " << timer.format() << std::endl;
 }
 
-
 const Node DecisionTree::buildTree(const Data& rows, const MetaData& meta) {
-  //TODO: build a decision tree
-  //   [gain, question] = find_best_split(..)
-  //   IF gain == 0 DO
-  //      Create a leaf node
-  //   ELSE
-  //      Split the dataset among two branches and build the two subtrees
-  //   END
+  //std::cout << "Number of data points: " << rows.size() << std::endl;
+  //std::cout << "Number of attributes: " << meta.labels.size() << std::endl;
+  auto [gain, question] = Calculations::find_best_split(rows, meta);
+  if(gain == 0){
+    ClassCounter clsCounter = Calculations::classCounts(rows);
+    return Node(Leaf(clsCounter));
+  }
+  else {
+    auto [rows_left, rows_right] = Calculations::partition(rows, question);
+    return Node(buildTree(rows_left, meta), buildTree(rows_right, meta), question);
+  }
 }
 
 void DecisionTree::print() const {
