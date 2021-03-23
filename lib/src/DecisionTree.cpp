@@ -27,6 +27,7 @@ const Node DecisionTree::buildTree(const Data& rows, const MetaData& meta) {
   else {
     auto [true_rows, false_rows] = Calculations::partition(rows, question);
     std::cout << question.toString(meta.labels) << std::endl;
+    std::cout << "Left: " << false_rows.size() << ", Right: " << true_rows.size() << std::endl;
     return Node(buildTree(true_rows, meta), buildTree(false_rows, meta), question);
   }
 }

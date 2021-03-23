@@ -8,8 +8,8 @@
 
 int main() {
   Dataset d;
-  d.train.filename = "../data/iris.arff";
-  d.test.filename = "../data/iris_test.arff";
+  d.train.filename = "../data/covtype.arff";
+  d.test.filename = "../data/covtype_test.arff";
 
   DataReader dr(d);
   DecisionTree dt(dr);
