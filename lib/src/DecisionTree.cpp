@@ -19,16 +19,15 @@ DecisionTree::DecisionTree(const DataReader& dr) : root_(Node()), dr_(dr) {
 }
 
 const Node DecisionTree::buildTree(const Data& rows, const MetaData& meta) {
-  //std::cout << "Number of data points: " << rows.size() << std::endl;
-  //std::cout << "Number of attributes: " << meta.labels.size() << std::endl;
   auto [gain, question] = Calculations::find_best_split(rows, meta);
   if(gain == 0){
     ClassCounter clsCounter = Calculations::classCounts(rows);
     return Node(Leaf(clsCounter));
   }
   else {
-    auto [rows_left, rows_right] = Calculations::partition(rows, question);
-    return Node(buildTree(rows_left, meta), buildTree(rows_right, meta), question);
+    auto [true_rows, false_rows] = Calculations::partition(rows, question);
+    std::cout << question.toString(meta.labels) << std::endl;
+    return Node(buildTree(true_rows, meta), buildTree(false_rows, meta), question);
   }
 }
 

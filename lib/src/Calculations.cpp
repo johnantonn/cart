@@ -39,7 +39,7 @@ tuple<const double, const Question> Calculations::find_best_split(const Data& ro
   // Calculate class counts
   ClassCounter clsCounter = classCounts(rows);
   // Calculate total gini
-  double gini_node = Calculations::gini(clsCounter, N);
+  double gini_node = gini(clsCounter, N);
   //std::cout << "Node Gini: " << gini_node << std::endl;
   // Best split for each feature
   for(int f=0; f<meta.labels.size()-1; f++){
@@ -49,7 +49,7 @@ tuple<const double, const Question> Calculations::find_best_split(const Data& ro
       best_threshold = determine_best_threshold_cat(rows, f);
     }
     else if (meta.types[f] == "NUMERIC"){
-      best_threshold = determine_best_threshold_numeric(rows, f);
+      best_threshold = determine_best_threshold_numeric1(rows, f);
     }
     else {
       throw std::runtime_error("Attribute type is neither NUMERICAL nor CATEGORICAL.");
@@ -72,37 +72,112 @@ const double Calculations::gini(const ClassCounter& counts, double N) {
   return impurity;
 }
 
+tuple<std::string, double> Calculations::determine_best_threshold_numeric1(const Data& data, int col) {
+  std::cout << "Ordinal feature: " << col << std::endl;
+  double best_loss = std::numeric_limits<float>::infinity();
+  std::string best_thresh;
+  int N = data.size();
+  // Check for N=0
+  if(N==0){return forward_as_tuple(best_thresh, best_loss);};
+  std::cout << "Number of data points: " << N << std::endl;
+  Data fData;
+  // Construct the subset of feature and class columns
+  for(int i=0; i<N; i++){
+    int l = data[i].size();
+    fData.push_back({data[i][col], data[i][l-1]});
+  };
+  // Sort data based on feature of col (numeric/ordinal)
+  std::sort(fData.begin(), fData.end(), [](VecS& a, VecS& b) {
+    return std::stod(a[0]) < std::stod(b[0]);
+  });
+  if(N==2){
+    for(int i=0; i<2; i++){
+      for(int j=0; j<2; j++){
+        std::cout << fData[i][j] << ", ";
+      }
+      std::cout << std::endl;
+    }
+  }
+  // Trivial split (according to first value)
+  int nTrue=fData.size(), nFalse=0;
+  // Calculate class counters once
+  ClassCounter clsCntTrue = classCounts(fData);
+  ClassCounter clsCntFalse;
+  // Gini
+  double gini_true = gini(clsCntTrue, nTrue);
+  if(N == 2){
+    std::cout << "Calculating gini for false class..." << nFalse << std::endl;
+  }
+  double gini_false = gini(clsCntFalse, nFalse);
+  if(N==2){
+    std::cout << "Calculated gini index for false class:" << gini_false << std::endl;
+  }
+  std::cout << "N=" << N << ", " << "nTrue=" << nTrue << ", nFalse=" << nFalse << ", gini_true="<< gini_true << ", gini_false=" << gini_false << std::endl;
+  double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
+  if(gini_part < best_loss){
+    best_loss = gini_part;
+    best_thresh = fData[0][0];
+  }
+  // Update counters
+  for(int i=0; i<N; i++){
+    nTrue--;
+    nFalse++;
+    std::string decision = fData[i][1];
+    clsCntTrue.at(decision)--;
+    if (clsCntFalse.find(decision) != std::end(clsCntFalse)) {
+      clsCntFalse.at(decision)++;
+    } else {
+      clsCntFalse[decision] += 1;
+    }
+    gini_true = gini(clsCntTrue, nTrue);
+    gini_false = gini(clsCntFalse, nFalse);
+    gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
+    if(gini_part < best_loss){
+      best_loss = gini_part;
+      best_thresh = fData[i][0];
+      //std::cout << "Index: " << i << ", N = " << N << " = " << nTrue << " + " << nFalse << ", gini: " << gini_part << std::endl;
+    }
+  }
+  std::cout << "best_loss: " << best_loss << ", best_thresh: " << best_thresh << std::endl;
+  return forward_as_tuple(best_thresh, best_loss);
+}
+
 tuple<std::string, double> Calculations::determine_best_threshold_numeric(const Data& data, int col) {
+  std::cout << "Numerical feature: " << col << std::endl;
+  std::cout << "Number of data points: " << data.size() << std::endl;
   double best_loss = std::numeric_limits<float>::infinity();
   std::string best_thresh;
   // For each value
   for(int i=0; i<data.size(); i++){
     Question q(col, data[i][col]);
-    auto [true_rows, false_rows] = Calculations::partition(data, q);
+    auto [true_rows, false_rows] = partition(data, q);
     ClassCounter clsCntTrue = classCounts(true_rows);
     ClassCounter clsCntFalse = classCounts(false_rows);
-    double gini_true = Calculations::gini(clsCntTrue, true_rows.size());
-    double gini_false = Calculations::gini(clsCntFalse, false_rows.size());
+    double gini_true = gini(clsCntTrue, true_rows.size());
+    double gini_false = gini(clsCntFalse, false_rows.size());
     double gini_part = gini_true*((double) true_rows.size()/data.size()) + gini_false*((double) false_rows.size()/data.size());
     if(gini_part < best_loss){
       best_loss = gini_part;
       best_thresh = data[i][col];
+      //std::cout << "Index: " << i << ", N = " << data.size() << " = " << true_rows.size() << " + " << false_rows.size() << ", gini: " << gini_part << std::endl;
     }
   }
   return forward_as_tuple(best_thresh, best_loss);
 }
 
 tuple<std::string, double> Calculations::determine_best_threshold_cat(const Data& data, int col) {
+  std::cout << "Categorical feature: " << col << std::endl;
+  std::cout << "Number of data points: " << data.size() << std::endl;
   double best_loss = std::numeric_limits<float>::infinity();
   std::string best_thresh;
   // For each value
   for(int i=0; i<data.size(); i++){
     Question q(col, data[i][col]);
-    auto [true_rows, false_rows] = Calculations::partition(data, q);
+    auto [true_rows, false_rows] = partition(data, q);
     ClassCounter clsCntTrue = classCounts(true_rows);
     ClassCounter clsCntFalse = classCounts(false_rows);
-    double gini_true = Calculations::gini(clsCntTrue, true_rows.size());
-    double gini_false = Calculations::gini(clsCntFalse, false_rows.size());
+    double gini_true = gini(clsCntTrue, true_rows.size());
+    double gini_false = gini(clsCntFalse, false_rows.size());
     double gini_part = gini_true*((double) true_rows.size()/data.size()) + gini_false*((double) false_rows.size()/data.size());
     if(gini_part < best_loss){
       best_loss = gini_part;
