@@ -34,10 +34,8 @@ tuple<Data, Data> Calculations::partition(const Data& data, const Question& q) {
 tuple<const double, const Question> Calculations::find_best_split(const Data& rows, const MetaData& meta) {
   double best_gain = 0.0;  // keep track of the best information gain
   auto best_question = Question();  // keep track of the feature / value that produced it
-  int N = rows.size(); // number of data points
-  // Calculate node's Gini impurity
   ClassCounter clsCounter = classCounts(rows);
-  double gini_node = gini(clsCounter, N);
+  double gini_node = gini(clsCounter, rows.size());
   // Best split for each feature
   for(int f=0; f<meta.labels.size()-1; f++){
     tuple<std::string, double> best_threshold;
@@ -69,11 +67,10 @@ const double Calculations::gini(const ClassCounter& counts, double N) {
 }
 
 tuple<std::string, double> Calculations::determine_best_threshold_numeric(const Data& data, int col) {
-  double best_loss = std::numeric_limits<float>::infinity();
-  std::string best_thresh;
-  int N = data.size();
-  int nTrue=N, nFalse=0;
   Data fData;
+  double best_loss = std::numeric_limits<float>::infinity();
+  int N = data.size(), nTrue=N, nFalse=0;
+  std::string best_thresh, decision;
   // Construct the subset of feature and class columns
   for(int i=0; i<N; i++){
     int l = data[i].size();
@@ -84,20 +81,19 @@ tuple<std::string, double> Calculations::determine_best_threshold_numeric(const 
     return std::stod(a[0]) < std::stod(b[0]);
   });
   // Initialize class counters
-  ClassCounter clsCntTrue = classCounts(fData);
-  ClassCounter clsCntFalse;
+  ClassCounter clsCntTrue, clsCntFalse;
+  clsCntTrue = classCounts(fData);
   // Update class counters and compute gini
   for(int i=0; i<N-1; i++){
     nTrue--;
     nFalse++;
-    std::string decision = fData[i][1];
+    decision = fData[i][1];
     clsCntTrue.at(decision)--;
     if (clsCntFalse.find(decision) != std::end(clsCntFalse)) {
       clsCntFalse.at(decision)++;
     } else {
       clsCntFalse[decision] += 1;
     }
-    // Gini
     if(fData[i][0].compare(fData[i+1][0])!=0){
       double gini_true = gini(clsCntTrue, nTrue);
       double gini_false = gini(clsCntFalse, nFalse);
@@ -112,11 +108,11 @@ tuple<std::string, double> Calculations::determine_best_threshold_numeric(const 
 }
 
 tuple<std::string, double> Calculations::determine_best_threshold_cat(const Data& data, int col) {
-  double best_loss = std::numeric_limits<float>::infinity();
-  std::string best_thresh;
-  int N = data.size();
-  int nTrue=N, nFalse=0;
+  // Variable definitions
   Data fData;
+  std::string best_thresh;
+  double best_loss = std::numeric_limits<float>::infinity();
+  int N = data.size();
   // Construct the subset of feature and class columns
   for(int i=0; i<N; i++){
     int l = data[i].size();
@@ -127,27 +123,34 @@ tuple<std::string, double> Calculations::determine_best_threshold_cat(const Data
     return a[0].compare(b[0]) < 0;
   });
   // Initialize class counters
-  ClassCounter clsCntTrue = classCounts(fData);
-  ClassCounter clsCntFalse;
+  ClassCounter clsCntTrueGlobal, clsCntFalseGlobal, clsCntTrue, clsCntFalse;
+  clsCntFalseGlobal = classCounts(fData);
+  clsCntFalse = clsCntFalseGlobal;
   // Update class counters and compute gini
+  int tmpValueCounter = 0, nTrue=0, nFalse=N;
+  std::string decision;
   for(int i=0; i<N-1; i++){
-    nTrue--;
-    nFalse++;
-    std::string decision = fData[i][1];
-    clsCntTrue.at(decision)--;
-    if (clsCntFalse.find(decision) != std::end(clsCntFalse)) {
-      clsCntFalse.at(decision)++;
+    tmpValueCounter++;
+    decision = fData[i][1];
+    clsCntFalse.at(decision)--;
+    if (clsCntTrue.find(decision) != std::end(clsCntTrue)) {
+      clsCntTrue.at(decision)++;
     } else {
-      clsCntFalse[decision] += 1;
+      clsCntTrue[decision] += 1;
     }
     if(fData[i][0].compare(fData[i+1][0])!=0){
+      nTrue=tmpValueCounter;
+      nFalse=N-tmpValueCounter;
       double gini_true = gini(clsCntTrue, nTrue);
-      double gini_false = gini(clsCntFalse, nFalse);
+      double gini_false = gini(clsCntFalse, N-nFalse);
       double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
       if(gini_part < best_loss){
         best_loss = gini_part;
         best_thresh = fData[i+1][0];
       }
+      tmpValueCounter=0;
+      clsCntTrue=clsCntTrueGlobal;
+      clsCntFalse=clsCntFalseGlobal;
     }
   }
   return forward_as_tuple(best_thresh, best_loss);
