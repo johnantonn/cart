@@ -17,7 +17,7 @@ using std::vector;
 using std::string;
 using std::unordered_map;
 
-tuple<const Data, const Data> Calculations::partition(const Data& data, const Question& q) {
+tuple<Data, Data> Calculations::partition(const Data& data, const Question& q) {
   Data true_rows;
   Data false_rows;
   
@@ -36,9 +36,7 @@ tuple<const double, const Question> Calculations::find_best_split(const Data& ro
   auto best_question = Question();  // keep track of the feature / value that produced it
   int N = rows.size(); // number of data points
   // Calculate node's Gini impurity
-  // Calculate class counts
   ClassCounter clsCounter = classCounts(rows);
-  // Calculate total gini
   double gini_node = gini(clsCounter, N);
   // Best split for each feature
   for(int f=0; f<meta.labels.size()-1; f++){
@@ -75,7 +73,7 @@ tuple<std::string, double> Calculations::determine_best_threshold_numeric(const 
   std::string best_thresh;
   int N = data.size();
   int nTrue=N, nFalse=0;
-  Data& fData;
+  Data fData;
   // Construct the subset of feature and class columns
   for(int i=0; i<N; i++){
     int l = data[i].size();

@@ -19,7 +19,7 @@ using ClassCounter = std::unordered_map<std::string, int>;
 
 namespace Calculations {
 
-std::tuple<const Data, const Data> partition(const Data &data, const Question &q);
+std::tuple<Data, Data> partition(const Data &data, const Question &q);
 
 const double gini(const ClassCounter& counts, double N);
 
