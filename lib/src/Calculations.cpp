@@ -74,24 +74,21 @@ tuple<std::string, double> Calculations::determine_best_threshold_numeric(const 
   double best_loss = std::numeric_limits<float>::infinity();
   std::string best_thresh;
   int N = data.size();
-  // Check for N=0
-  if(N==0){return forward_as_tuple(best_thresh, best_loss);};
-  Data fData;
+  int nTrue=N, nFalse=0;
+  Data& fData;
   // Construct the subset of feature and class columns
   for(int i=0; i<N; i++){
     int l = data[i].size();
     fData.push_back({data[i][col], data[i][l-1]});
   };
-  // Sort data based on feature of col (numeric/ordinal)
+  // Sort based on ordinal feature
   std::sort(fData.begin(), fData.end(), [](VecS& a, VecS& b) {
     return std::stod(a[0]) < std::stod(b[0]);
   });
-  // Initial split (according to first value)
-  int nTrue=fData.size(), nFalse=0;
-  // Calculate class counters once
+  // Initialize class counters
   ClassCounter clsCntTrue = classCounts(fData);
   ClassCounter clsCntFalse;
-  // Update counters
+  // Update class counters and compute gini
   for(int i=0; i<N-1; i++){
     nTrue--;
     nFalse++;
@@ -102,7 +99,8 @@ tuple<std::string, double> Calculations::determine_best_threshold_numeric(const 
     } else {
       clsCntFalse[decision] += 1;
     }
-    if(std::stod(fData[i][0])<std::stod(fData[i+1][0])){
+    // Gini
+    if(fData[i][0].compare(fData[i+1][0])!=0){
       double gini_true = gini(clsCntTrue, nTrue);
       double gini_false = gini(clsCntFalse, nFalse);
       double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
@@ -118,18 +116,40 @@ tuple<std::string, double> Calculations::determine_best_threshold_numeric(const 
 tuple<std::string, double> Calculations::determine_best_threshold_cat(const Data& data, int col) {
   double best_loss = std::numeric_limits<float>::infinity();
   std::string best_thresh;
-  // For each value
-  for(int i=0; i<data.size(); i++){
-    Question q(col, data[i][col]);
-    auto [true_rows, false_rows] = partition(data, q);
-    ClassCounter clsCntTrue = classCounts(true_rows);
-    ClassCounter clsCntFalse = classCounts(false_rows);
-    double gini_true = gini(clsCntTrue, true_rows.size());
-    double gini_false = gini(clsCntFalse, false_rows.size());
-    double gini_part = gini_true*((double) true_rows.size()/data.size()) + gini_false*((double) false_rows.size()/data.size());
-    if(gini_part < best_loss){
-      best_loss = gini_part;
-      best_thresh = data[i][col];
+  int N = data.size();
+  int nTrue=N, nFalse=0;
+  Data fData;
+  // Construct the subset of feature and class columns
+  for(int i=0; i<N; i++){
+    int l = data[i].size();
+    fData.push_back({data[i][col], data[i][l-1]});
+  };
+  // Sort based on categorical feature
+  std::sort(fData.begin(), fData.end(), [](VecS& a, VecS& b) {
+    return a[0].compare(b[0]) < 0;
+  });
+  // Initialize class counters
+  ClassCounter clsCntTrue = classCounts(fData);
+  ClassCounter clsCntFalse;
+  // Update class counters and compute gini
+  for(int i=0; i<N-1; i++){
+    nTrue--;
+    nFalse++;
+    std::string decision = fData[i][1];
+    clsCntTrue.at(decision)--;
+    if (clsCntFalse.find(decision) != std::end(clsCntFalse)) {
+      clsCntFalse.at(decision)++;
+    } else {
+      clsCntFalse[decision] += 1;
+    }
+    if(fData[i][0].compare(fData[i+1][0])!=0){
+      double gini_true = gini(clsCntTrue, nTrue);
+      double gini_false = gini(clsCntFalse, nFalse);
+      double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
+      if(gini_part < best_loss){
+        best_loss = gini_part;
+        best_thresh = fData[i+1][0];
+      }
     }
   }
   return forward_as_tuple(best_thresh, best_loss);
