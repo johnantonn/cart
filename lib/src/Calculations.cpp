@@ -108,49 +108,47 @@ tuple<std::string, double> Calculations::determine_best_threshold_numeric(const 
 }
 
 tuple<std::string, double> Calculations::determine_best_threshold_cat(const Data& data, int col) {
-  // Variable definitions
-  Data fData;
   std::string best_thresh;
   double best_loss = std::numeric_limits<float>::infinity();
   int N = data.size();
-  // Construct the subset of feature and class columns
-  for(int i=0; i<N; i++){
-    int l = data[i].size();
-    fData.push_back({data[i][col], data[i][l-1]});
-  };
-  // Sort based on categorical feature
-  std::sort(fData.begin(), fData.end(), [](VecS& a, VecS& b) {
-    return a[0].compare(b[0]) < 0;
-  });
+  int lastIdx = data[0].size()-1;
   // Initialize class counters
-  ClassCounter clsCntTrueGlobal, clsCntFalseGlobal, clsCntTrue, clsCntFalse;
-  clsCntFalseGlobal = classCounts(fData);
-  clsCntFalse = clsCntFalseGlobal;
-  // Update class counters and compute gini
-  int tmpValueCounter = 0, nTrue=0, nFalse=N;
-  std::string decision;
-  for(int i=0; i<N-1; i++){
-    tmpValueCounter++;
-    decision = fData[i][1];
-    clsCntFalse.at(decision)--;
-    if (clsCntTrue.find(decision) != std::end(clsCntTrue)) {
-      clsCntTrue.at(decision)++;
-    } else {
-      clsCntTrue[decision] += 1;
+  ClassCounter counterTrue;
+  ClassCounter counterFalse = classCounts(data);;
+  std::unordered_map<std::string, ClassCounter> mapOfCountersTrue;
+  std::unordered_map<std::string, ClassCounter> mapOfCountersFalse;
+  for(int i=0; i<N; i++){
+    std::string decision = data[i][lastIdx];
+    // Check (create) class counter for true set
+    if(mapOfCountersTrue.find(data[i][col]) == std::end(mapOfCountersTrue)){
+      mapOfCountersTrue[data[i][col]] = counterTrue;
     }
-    if(fData[i][0].compare(fData[i+1][0])!=0){
-      nTrue=tmpValueCounter;
-      nFalse=N-tmpValueCounter;
-      double gini_true = gini(clsCntTrue, nTrue);
-      double gini_false = gini(clsCntFalse, N-nFalse);
-      double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
-      if(gini_part < best_loss){
-        best_loss = gini_part;
-        best_thresh = fData[i+1][0];
-      }
-      tmpValueCounter=0;
-      clsCntTrue=clsCntTrueGlobal;
-      clsCntFalse=clsCntFalseGlobal;
+    // Check (create) class counter for false set
+    if(mapOfCountersFalse.find(data[i][col]) == std::end(mapOfCountersFalse)){
+      mapOfCountersFalse[data[i][col]] = counterFalse;
+    }
+    // Update
+    mapOfCountersFalse.at(data[i][col]).at(decision)--;
+    if (mapOfCountersTrue.at(data[i][col]).find(decision) != std::end(mapOfCountersTrue.at(data[i][col]))) {
+      mapOfCountersTrue.at(data[i][col]).at(decision)++;
+    } else {
+      mapOfCountersTrue.at(data[i][col])[decision] += 1;
+    }
+  }
+
+  // Compute gini for each value
+  for(const auto& n: mapOfCountersTrue) {
+    int nTrue = 0;
+    for(const auto& m: mapOfCountersTrue.at(n.first)) {
+      nTrue += m.second;
+    }
+    int nFalse = N - nTrue;
+    double gini_true = gini(n.second, nTrue);
+    double gini_false = gini(mapOfCountersFalse.at(n.first), nFalse);
+    double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
+    if(gini_part < best_loss){
+      best_loss = gini_part;
+      best_thresh = n.first;
     }
   }
   return forward_as_tuple(best_thresh, best_loss);
