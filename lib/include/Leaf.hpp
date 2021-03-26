@@ -12,8 +12,8 @@
 #include <vector>
 
 // You can change these data types
-using Data = std::vector<std::vector<std::string>>;
-using ClassCounter = std::unordered_map<std::string, int>;
+using Data = std::vector<std::vector<int>>;
+using ClassCounter = std::unordered_map<int, int>;
 
 
 /**

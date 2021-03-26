@@ -131,16 +131,42 @@ bool DataReader::parseHeaderLine(const std::string &line, MetaData &meta, bool &
 }
 
 bool DataReader::parseDataLine(const std::string &line, Data &data, MetaData &meta) {
-  std::vector<std::string> vec;
-  split(vec, line, boost::is_any_of(","));
-  trimWhiteSpaces(vec);
+  VecS vecS;
+  VecI vecI;
+  split(vecS, line, boost::is_any_of(","));
+  trimWhiteSpaces(vecS);
 
-  if (classLabel_.empty()) {
-    data.emplace_back(std::move(vec));
-  } else {
-    moveClassDataToBack(vec, meta.labels);
-    data.emplace_back(std::move(vec));
+  if (!classLabel_.empty()) {
+    moveClassDataToBack(vecS, meta.labels);
   }
+
+  // Map strings to integers
+  std::hash<std::string> hasher;
+  MapIS mapIS;
+  for(int i=0; i<vecS.size(); i++){
+    if(meta.types[i]=="NUMERIC"){
+      // Convert to int
+      vecI.push_back(std::stod(vecS[i]));
+    }
+    else if(meta.types[i]=="CATEGORICAL"){
+      // Hash
+      int hash = hasher(vecS[i]);
+      vecI.push_back(hash);
+      // Store the mapping
+      if(meta.dMapIS.find(meta.labels[i]) == std::end(meta.dMapIS)){
+        meta.dMapIS[meta.labels[i]] = mapIS;
+      }
+      if (meta.dMapIS.at(meta.labels[i]).find(hash) == std::end(meta.dMapIS.at(meta.labels[i]))) {
+        meta.dMapIS.at(meta.labels[i])[hash] = vecS[i];
+      } 
+    }
+    else {
+      throw std::runtime_error("Attribute type is neither NUMERICAL nor CATEGORICAL.");
+    }
+  }
+
+  // Store line to data object
+  data.emplace_back(std::move(vecI));
 
   return true;
 }

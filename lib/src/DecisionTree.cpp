@@ -26,7 +26,7 @@ const Node DecisionTree::buildTree(const Data& rows, const MetaData& meta) {
   }
   else {
     auto [true_rows, false_rows] = Calculations::partition(rows, question);
-    std::cout << question.toString(meta.labels) << std::endl;
+    std::cout << question.toString(meta) << std::endl;
     std::cout << "True branch: " << true_rows.size() << ", False branch: " << false_rows.size() << std::endl;
     Node trueBranch = buildTree(true_rows, meta);
     true_rows.clear();
@@ -46,7 +46,7 @@ void DecisionTree::print(const shared_ptr<Node> root, string spacing) const {
     std::cout << spacing + "Predict: "; Utils::print::print_map(leaf->predictions());
     return;
   }
-  std::cout << spacing << root->question().toString(dr_.metaData().labels) << "\n";
+  std::cout << spacing << root->question().toString(dr_.metaData()) << "\n";
 
   std::cout << spacing << "--> True: " << "\n";
   print(root->trueBranch(), spacing + "   ");

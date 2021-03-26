@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-using VecS = std::vector<std::string>;
+#include "Utils.hpp"
 
 /**
  * Representation of a "test" on an attritbute.
@@ -20,15 +20,18 @@ using VecS = std::vector<std::string>;
 class Question {
   public:
     Question();
-    Question(const int column, const std::string value);
+    Question(const int column, const int value, const MetaData& meta);
 
-    const bool solve(VecS example) const;
-    const bool isNumeric(std::string value) const;
-    const bool isNumeric(void) const;
-    const std::string toString(const VecS& labels) const;
+    inline const bool isNumeric() const {return isNumeric_;};
+    const bool solve(VecI example) const;
+    const std::string toString(const MetaData& meta) const;
 
     int column_;
-    std::string value_;
+    int value_;
+    
+  private:
+    bool isNumeric_;
+
 };
 
 #endif //DECISIONTREE_QUESTION_HPP

@@ -13,7 +13,7 @@ TreeTest::TreeTest(const Data& testData, const MetaData& meta, const Node &root)
   test(testData, meta.labels, make_shared<Node>(root));
 }
 
-const ClassCounter TreeTest::classify(const VecS& row, shared_ptr<Node> node) const {
+const ClassCounter TreeTest::classify(const VecI& row, shared_ptr<Node> node) const {
   if (bool is_leaf = node->leaf() != nullptr; is_leaf) {
     const auto &leaf = node->leaf();
     return leaf->predictions();

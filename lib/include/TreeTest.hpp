@@ -10,7 +10,7 @@
 #include "Node.hpp"
 #include "Utils.hpp"
 
-using ClassCounterScaled = std::unordered_map<std::string, std::string>;
+using ClassCounterScaled = std::unordered_map<int, std::string>;
 
 class TreeTest {
   public:
@@ -18,7 +18,7 @@ class TreeTest {
     TreeTest(const Data& testData, const MetaData& meta, const Node &root);
     ~TreeTest() = default;
 
-    const ClassCounter classify(const VecS& row, std::shared_ptr<Node> node) const;
+    const ClassCounter classify(const VecI& row, std::shared_ptr<Node> node) const;
 
   private:
     void printLeaf(ClassCounter counts) const;

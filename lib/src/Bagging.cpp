@@ -50,13 +50,13 @@ void Bagging::test() const {
   float accuracy = 0;
   for (const auto& row: dr_.testData()) {
     static size_t last = row.size() - 1;
-    std::vector<std::string> decisions;
+    std::vector<int> decisions;
     for (int i = 0; i < ensembleSize_; i++) {
       const std::shared_ptr<Node> root = std::make_shared<Node>(learners_.at(i).root_);
       const auto& classification = t.classify(row, root);
       decisions.push_back(Utils::tree::getMax(classification));
     }
-    std::string prediction = Utils::iterators::mostCommon(decisions.begin(), decisions.end());
+    int prediction = Utils::iterators::mostCommon(decisions.begin(), decisions.end());
     if (prediction == row[last])
       accuracy += 1;
   }

@@ -20,11 +20,14 @@
 
 // You can change these data type aliases
 using VecS = std::vector<std::string>;
-using Data = std::vector<std::vector<std::string>>;
+using VecI = std::vector<int>;
+using Data = std::vector<std::vector<int>>;
+using MapIS = std::unordered_map<int, std::string>;
+using DMapIS = std::unordered_map<std::string, MapIS>;
 struct MetaData {
   VecS labels;
-  // Here you can store additional meta data
   VecS types;
+  DMapIS dMapIS; // mapping of hashes to original string values
 };
 
 

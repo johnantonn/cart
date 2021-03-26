@@ -23,7 +23,7 @@
  * TODO: A working implementation is provided, although you might want to make
  * some changes to enable faster decision tree learning. The definition of the
  * public methods (including the constructor) can not be altered. All private 
- * methods can be modified as you which.
+ * methods can be modified as you wish.
  */
 class DataReader
 {
@@ -35,8 +35,8 @@ class DataReader
     inline const Data& testData() const { return testData_; }
     inline const MetaData& metaData() const { return trainMetaData_; }
 
-    inline const void setBaggingData(Data &data){  backupTrainData_=trainData_; trainData_=data;};
-    inline const void resetBaggingData(){ trainData_=backupTrainData_; backupTrainData_={};};
+    inline const void setBaggingData(Data &data){  backupTrainData_=trainData_; trainData_=data;}
+    inline const void resetBaggingData(){ trainData_=backupTrainData_; backupTrainData_={};}
 
   private:
     void processFile(const std::string& strings, Data& data, MetaData &meta);
@@ -53,6 +53,7 @@ class DataReader
     Data testData_;
     MetaData trainMetaData_;
     MetaData testMetaData_;
+    DMapIS dMapIS_;
 
 };
 
