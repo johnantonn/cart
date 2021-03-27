@@ -18,16 +18,16 @@ DecisionTree::DecisionTree(const DataReader& dr) : root_(Node()), dr_(dr) {
   std::cout << "Done. " << timer.format() << std::endl;
 }
 
-const Node DecisionTree::buildTree(const Data& rows, const MetaData& meta) {
-  auto [gain, question] = Calculations::find_best_split(rows, meta);
+const Node DecisionTree::buildTree(const Data& cols, const MetaData& meta) {
+  auto [gain, question] = Calculations::find_best_split(cols, meta);
   if(gain == 0){
-    ClassCounter clsCounter = Calculations::classCounts(rows);
+    ClassCounter clsCounter = Calculations::classCounts(cols[meta.labels.size()-1]);
     return Node(Leaf(clsCounter));
   }
   else {
-    auto [true_rows, false_rows] = Calculations::partition(rows, question);
+    auto [true_rows, false_rows] = Calculations::partition(cols, question);
     std::cout << question.toString(meta) << std::endl;
-    std::cout << "True branch: " << true_rows.size() << ", False branch: " << false_rows.size() << std::endl;
+    std::cout << "True branch: " << true_rows[0].size() << ", False branch: " << false_rows[0].size() << std::endl;
     Node trueBranch = buildTree(true_rows, meta);
     true_rows.clear();
     Node falseBranch = buildTree(false_rows, meta);

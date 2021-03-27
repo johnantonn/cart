@@ -23,6 +23,7 @@ class Question {
     Question(const int column, const int value, const MetaData& meta);
 
     inline const bool isNumeric() const {return isNumeric_;};
+    const bool solve(int val) const;
     const bool solve(VecI example) const;
     const std::string toString(const MetaData& meta) const;
 

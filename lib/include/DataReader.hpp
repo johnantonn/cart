@@ -39,13 +39,14 @@ class DataReader
     inline const void resetBaggingData(){ trainData_=backupTrainData_; backupTrainData_={};}
 
   private:
-    void processFile(const std::string& strings, Data& data, MetaData &meta);
+    void processFileTraining(const std::string& strings, Data& data, MetaData &meta);
+    void processFileTesting(const std::string& strings, Data& data, MetaData &meta);
     void moveClassDataToBack(VecS &line, const VecS &labels) const;
     void moveClassLabelToBack();
     void trimWhiteSpaces(VecS &line);
 
     bool parseHeaderLine(const std::string& line, MetaData &meta, bool &header_loaded);
-    bool parseDataLine(const std::string& line, Data &data, MetaData &meta);
+    bool parseDataLine(const std::string& line, Data &data, MetaData &meta, std::string type);
 
     const std::string classLabel_;
     Data trainData_;

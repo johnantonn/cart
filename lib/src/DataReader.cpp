@@ -18,12 +18,12 @@ DataReader::DataReader(const Dataset& dataset) :
     trainMetaData_({}),
     testMetaData_({}) {
   std::cout << "Start reading data set." << std::endl; cpu_timer timer;
-  std::thread readTestingData([this, &dataset]() {
-    return processFile(dataset.train.filename, trainData_, trainMetaData_);
+  std::thread readTrainingData([this, &dataset]() {
+    return processFileTraining(dataset.train.filename, trainData_, trainMetaData_);
   });
 
-  std::thread readTrainingData([this, &dataset]() {
-    return processFile(dataset.test.filename, testData_, testMetaData_);
+  std::thread readTestingData([this, &dataset]() {
+    return processFileTesting(dataset.test.filename, testData_, testMetaData_);
   });
 
   readTrainingData.join();
@@ -40,7 +40,26 @@ DataReader::DataReader(const Dataset& dataset) :
     throw std::runtime_error("Can't open file: " + dataset.test.filename);
 }
 
-void DataReader::processFile(const std::string& filename, Data& data, MetaData &meta) {
+void DataReader::processFileTraining(const std::string& filename, Data& data, MetaData &meta) {
+  std::ifstream file(filename);
+  if (!file)
+    return;
+
+  std::string line;
+  bool header_loaded = false;
+
+  while (getline(file, line)) {
+    if (!header_loaded) {
+      parseHeaderLine(line, meta, header_loaded);
+      data = std::vector<std::vector<int>>(meta.labels.size(),std::vector<int>({}));
+    } else {
+      parseDataLine(line, data, meta, "training");
+    }
+  }
+  file.close();
+}
+
+void DataReader::processFileTesting(const std::string& filename, Data& data, MetaData &meta) {
   std::ifstream file(filename);
   if (!file)
     return;
@@ -52,7 +71,7 @@ void DataReader::processFile(const std::string& filename, Data& data, MetaData &
     if (!header_loaded) {
       parseHeaderLine(line, meta, header_loaded);
     } else {
-      parseDataLine(line, data, meta);
+      parseDataLine(line, data, meta, "testing");
     }
   }
   file.close();
@@ -130,7 +149,7 @@ bool DataReader::parseHeaderLine(const std::string &line, MetaData &meta, bool &
   return true;
 }
 
-bool DataReader::parseDataLine(const std::string &line, Data &data, MetaData &meta) {
+bool DataReader::parseDataLine(const std::string &line, Data &data, MetaData &meta, std::string type) {
   VecS vecS;
   VecI vecI;
   split(vecS, line, boost::is_any_of(","));
@@ -143,22 +162,28 @@ bool DataReader::parseDataLine(const std::string &line, Data &data, MetaData &me
   // Map strings to integers
   std::hash<std::string> hasher;
   MapIS mapIS;
-  for(int i=0; i<vecS.size(); i++){
+  for(size_t i=0; i<vecS.size(); i++){
     if(meta.types[i]=="NUMERIC"){
       // Convert to int
-      vecI.push_back(std::stod(vecS[i]));
+      if(type=="training")
+        data[i].push_back(std::stod(vecS[i]));
+      else
+        vecI.push_back(std::stod(vecS[i]));
     }
     else if(meta.types[i]=="CATEGORICAL"){
       // Hash
       int hash = hasher(vecS[i]);
-      vecI.push_back(hash);
+      if(type=="training")
+        data[i].push_back(hash);
+      else
+        vecI.push_back(hash);
       // Store the mapping
       if(meta.dMapIS.find(meta.labels[i]) == std::end(meta.dMapIS)){
         meta.dMapIS[meta.labels[i]] = mapIS;
       }
       if (meta.dMapIS.at(meta.labels[i]).find(hash) == std::end(meta.dMapIS.at(meta.labels[i]))) {
         meta.dMapIS.at(meta.labels[i])[hash] = vecS[i];
-      } 
+      }
     }
     else {
       throw std::runtime_error("Attribute type is neither NUMERICAL nor CATEGORICAL.");
@@ -166,7 +191,8 @@ bool DataReader::parseDataLine(const std::string &line, Data &data, MetaData &me
   }
 
   // Store line to data object
-  data.emplace_back(std::move(vecI));
+  if(type=="testing")
+    data.emplace_back(std::move(vecI));
 
   return true;
 }

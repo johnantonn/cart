@@ -23,13 +23,17 @@ std::tuple<Data, Data> partition(const Data &data, const Question &q);
 
 const double gini(const ClassCounter& counts, double N);
 
-std::tuple<const double, const Question> find_best_split(const Data &rows, const MetaData &meta);
+std::tuple<const double, const Question> find_best_split(const Data &cols, const MetaData &meta);
 
 std::tuple<int, double> determine_best_threshold_numeric(const Data &data, int col);
 
 std::tuple<int, double> determine_best_threshold_cat(const Data &data, int col);
 
-const ClassCounter classCounts(const Data &data);
+const ClassCounter classCounts(const VecI& classVec);
+
+void zip(const std::vector<int> &a, const std::vector<int> &b, std::vector<std::pair<int,int>> &zipped);
+
+void unzip(const std::vector<std::pair<int, int>> &zipped, std::vector<int> &a, std::vector<int> &b);
 
 } // namespace Calculations
 
