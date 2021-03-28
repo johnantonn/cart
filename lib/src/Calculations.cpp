@@ -125,7 +125,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
     // Write to log
     logFile << "Class counters, i=" << i << std::endl;
     for(const auto& n : clsCntTrue) {
-      logFile << "Key:[" << n.first << "] Value:[" << n.second << std::endl;
+      logFile << "Key:[" << n.first << "] Value:[" << n.second << "]" << std::endl;
     }
 
     if(fVec[i] < fVec[i+1]){
