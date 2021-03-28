@@ -89,7 +89,12 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   std::ofstream logFile;
   logFile.open("numeric_logs.txt", std::ios_base::app);
 
-  logFile << "Class counters: " << std::endl;
+  logFile << "Feature values (sorted):" << std::endl;
+  for(int i=0; i<N; i++){
+    logFile << fData[i][0] << ", ";
+  }
+
+  logFile << "\nClass counters: " << std::endl;
   for(const auto& n : clsCntTrue) {
     logFile << "Key:[" << n.first << "] Value:[" << n.second << "]\n";
   }
