@@ -7,6 +7,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
+#include <fstream>
 #include "Calculations.hpp"
 #include "Utils.hpp"
 
@@ -100,6 +101,16 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   // Initialize class counters
   ClassCounter clsCntTrue, clsCntFalse;
   clsCntTrue = classCounts(cVec);
+  
+  // Write logs to file
+  std::ofstream logFile;
+  logFile.open("numeric_logs.txt", std::ios_base::app);
+
+  logFile << "Class counters: " << std::endl;
+  for(const auto& n : clsCntTrue) {
+    logFile << "Key:[" << n.first << "] Value:[" << n.second << "]\n";
+  }
+
   // Update class counters and compute gini
   int nTrue = N;
   for(size_t i=0; i<N-1; i++){
@@ -111,6 +122,12 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
     } else {
       clsCntFalse[decision] += 1;
     }
+    // Write to log
+    logFile << "Class counters, i=" << i << std::endl;
+    for(const auto& n : clsCntTrue) {
+      logFile << "Key:[" << n.first << "] Value:[" << n.second << std::endl;
+    }
+
     if(fVec[i] < fVec[i+1]){
       int nFalse = N - nTrue;
       double gini_true = gini(clsCntTrue, nTrue);
@@ -122,6 +139,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
       }
     }
   }
+  logFile.close();
   return forward_as_tuple(best_thresh, best_loss);
 }
 
