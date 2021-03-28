@@ -106,7 +106,12 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   std::ofstream logFile;
   logFile.open("numeric_logs.txt", std::ios_base::app);
 
-  logFile << "Class counters: " << std::endl;
+  logFile << "Feature values (sorted):" << std::endl;
+  for(int i=0; i<N; i++){
+    logFile << fVec[i] << ", ";
+  }
+
+  logFile << "\nClass counters: " << std::endl;
   for(const auto& n : clsCntTrue) {
     logFile << "Key:[" << n.first << "] Value:[" << n.second << "]\n";
   }
@@ -122,6 +127,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
     } else {
       clsCntFalse[decision] += 1;
     }
+
     // Write to log
     logFile << "Class counters, i=" << i << std::endl;
     for(const auto& n : clsCntTrue) {
