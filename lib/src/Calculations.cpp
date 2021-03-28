@@ -86,17 +86,10 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   fVec = data[col]; //attr
   cVec = data[m-1]; //class
 
-  // Zip the vectors together
-  std::vector<std::pair<int,int>> zipped;
-  zip(fVec, cVec, zipped);
-
-  // Sort the vector of pairs
-  std::sort(std::begin(zipped), std::end(zipped), [&](const auto& a, const auto& b) {
-    return a.second < b.second;
-  });
-
-  // Write the sorted pairs back to the original vectors
-  unzip(zipped, fVec, cVec);
+  // Sort mapping
+  std::vector<std::size_t> index(fVec.size());
+  std::iota(index.begin(), index.end(), 0);
+  std::sort(index.begin(), index.end(), [&](size_t a, size_t b) { return fVec[a] < fVec[b]; });
 
   // Initialize class counters
   ClassCounter clsCntTrue, clsCntFalse;
@@ -107,8 +100,12 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   logFile.open("numeric_logs.txt", std::ios_base::app);
 
   logFile << "Feature values (sorted):" << std::endl;
-  for(int i=0; i<N; i++){
+  for(auto i : index){
     logFile << fVec[i] << ", ";
+  }
+  logFile << "\nClass values (sorted):" << std::endl;
+  for(auto i : index){
+    logFile << cVec[i] << ", ";
   }
 
   logFile << "\nClass counters: " << std::endl;
@@ -118,7 +115,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
 
   // Update class counters and compute gini
   int nTrue = N;
-  for(size_t i=0; i<N-1; i++){
+  for(auto i : index){
     nTrue--;
     int decision = cVec[i];
     clsCntTrue.at(decision)--;
@@ -207,23 +204,4 @@ const ClassCounter Calculations::classCounts(const VecI& classVec) {
     }
   }
   return counter;
-}
-
-// Fill the zipped vector with pairs consisting of the
-// corresponding elements of a and b. (This assumes 
-// that the vectors have equal length)
-void Calculations::zip(const std::vector<int> &a, const std::vector<int> &b, std::vector<std::pair<int,int>> &zipped) {
-  for(size_t i=0; i<a.size(); ++i) {
-    zipped.push_back(std::make_pair(a[i], b[i]));
-  }
-}
-
-// Write the first and second element of the pairs in 
-// the given zipped vector into a and b. (This assumes 
-// that the vectors have equal length)
-void Calculations::unzip(const std::vector<std::pair<int, int>> &zipped, std::vector<int> &a, std::vector<int> &b) {
-  for(size_t i=0; i<a.size(); i++) {
-    a[i] = zipped[i].first;
-    b[i] = zipped[i].second;
-  }
 }
