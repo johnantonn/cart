@@ -101,13 +101,13 @@ namespace Utils::print {
     }
 
   template<typename K, typename V>
-    void print_map(const std::unordered_map<K, V> &counter) {
+    void print_map(const std::unordered_map<K, V> &counter, MetaData meta) {
       if (counter.empty())
         return;
 
       std::cout << "{ ";
       for (const auto& [key, val]: counter) {
-        std::cout << key << ": " << val << " ";
+        std::cout << meta.dMapIS.at(meta.labels[meta.labels.size()-1]).at(key) << ": " << val << " ";
       }
       std::cout << "}" << "\n";
     }

@@ -48,7 +48,7 @@ void DecisionTree::print() const {
 void DecisionTree::print(const shared_ptr<Node> root, string spacing) const {
   if (bool is_leaf = root->leaf() != nullptr; is_leaf) {
     const auto &leaf = root->leaf();
-    std::cout << spacing + "Predict: "; Utils::print::print_map(leaf->predictions());
+    std::cout << spacing + "Predict: "; Utils::print::print_map(leaf->predictions(), dr_.metaData());
     return;
   }
   std::cout << spacing << root->question().toString(dr_.metaData()) << "\n";

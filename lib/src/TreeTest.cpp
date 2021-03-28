@@ -25,14 +25,14 @@ const ClassCounter TreeTest::classify(const VecI& row, shared_ptr<Node> node) co
     return classify(row, node->falseBranch());
 }
 
-void TreeTest::printLeaf(ClassCounter counts) const {
+void TreeTest::printLeaf(ClassCounter counts, MetaData &meta) const {
   const float total = static_cast<float>(Utils::tree::mapValueSum(counts));
   ClassCounterScaled scale;
 
   for (const auto& [key, val]: counts)
     scale[key] = std::to_string(val / total * 100) + "%";
 
-  Utils::print::print_map(scale);
+  Utils::print::print_map(scale, meta);
 }
 
 void TreeTest::test(const Data& testData, const VecS& labels, shared_ptr<Node> tree) const {

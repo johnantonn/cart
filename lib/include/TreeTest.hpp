@@ -21,7 +21,7 @@ class TreeTest {
     const ClassCounter classify(const VecI& row, std::shared_ptr<Node> node) const;
 
   private:
-    void printLeaf(ClassCounter counts) const;
+    void printLeaf(ClassCounter counts, MetaData &meta) const;
     void test(const Data& testing_data, const VecS& labels, std::shared_ptr<Node> tree) const;
 };
 
