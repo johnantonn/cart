@@ -39,13 +39,13 @@ tuple<Data, Data> Calculations::partition(const Data& data, const Question& q) {
 tuple<const double, const Question> Calculations::find_best_split(const Data& cols, const MetaData& meta) {
   double best_gain = 0.0;  // keep track of the best information gain
   Question best_question;  // keep track of the feature / value that produced it
-  int lastIdx = cols.size()-1;
+  int m = cols.size();
   int N = cols[0].size();
   // Unsplit node gini
-  ClassCounter clsCounter = classCounts(cols[lastIdx]);
+  ClassCounter clsCounter = classCounts(cols[m-1]);
   double gini_node = gini(clsCounter, N);
   // Best split for each feature
-  for(size_t f=0; f<lastIdx; f++){
+  for(size_t f=0; f<m-1; f++){
     tuple<int, double> best_threshold;
     if (meta.types[f] == "NUMERIC"){
       best_threshold = determine_best_threshold_numeric(cols, f);
