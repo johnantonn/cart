@@ -7,7 +7,6 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-#include <fstream>
 #include "Calculations.hpp"
 #include "Utils.hpp"
 
@@ -87,7 +86,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   cVec = data[m-1]; //class
 
   // Sort mapping
-  std::vector<std::size_t> index(fVec.size());
+  std::vector<std::size_t> index(N);
   std::iota(index.begin(), index.end(), 0);
   std::sort(index.begin(), index.end(), [&](size_t a, size_t b) { return fVec[a] < fVec[b]; });
 
@@ -95,24 +94,6 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   ClassCounter clsCntTrue, clsCntFalse;
   clsCntTrue = classCounts(cVec);
   
-  // Write logs to file
-  std::ofstream logFile;
-  logFile.open("numeric_logs.txt", std::ios_base::app);
-
-  logFile << "Feature values (sorted):" << std::endl;
-  for(auto i : index){
-    logFile << fVec[i] << ", ";
-  }
-  logFile << "\nClass values (sorted):" << std::endl;
-  for(auto i : index){
-    logFile << cVec[i] << ", ";
-  }
-
-  logFile << "\nClass counters: " << std::endl;
-  for(const auto& n : clsCntTrue) {
-    logFile << "Key:[" << n.first << "] Value:[" << n.second << "]\n";
-  }
-
   // Update class counters and compute gini
   int nTrue = N;
   for(auto i : index){
@@ -125,24 +106,18 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
       clsCntFalse[decision] += 1;
     }
 
-    // Write to log
-    logFile << "Class counters, i=" << i << std::endl;
-    for(const auto& n : clsCntTrue) {
-      logFile << "Key:[" << n.first << "] Value:[" << n.second << "]" << std::endl;
-    }
-
-    if(fVec[i] < fVec[i+1]){
+    if(i<N-1 && fVec[i] < fVec[i+1]){
       int nFalse = N - nTrue;
       double gini_true = gini(clsCntTrue, nTrue);
       double gini_false = gini(clsCntFalse, nFalse);
       double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
+      std::cout << "Numerical gini: " << gini_part << std::endl;
       if(gini_part < best_loss){
         best_loss = gini_part;
         best_thresh = fVec[i+1];
       }
     }
   }
-  logFile.close();
   return forward_as_tuple(best_thresh, best_loss);
 }
 
@@ -150,14 +125,14 @@ tuple<int, double> Calculations::determine_best_threshold_cat(const Data& data, 
   double best_loss = std::numeric_limits<float>::infinity();
   int best_thresh;
   int N = data[0].size();
-  int lastIdx = data.size()-1;
+  int m = data.size();
   // Initialize class counters
   ClassCounter counterTrue;
-  ClassCounter counterFalse = classCounts(data[lastIdx]);;
+  ClassCounter counterFalse = classCounts(data[m-1]);;
   std::unordered_map<int, ClassCounter> mapOfCountersTrue;
   std::unordered_map<int, ClassCounter> mapOfCountersFalse;
   for(size_t i=0; i<N; i++){
-    int decision = data[lastIdx][i];
+    int decision = data[m-1][i];
     // Check (create) class counter for true set
     if(mapOfCountersTrue.find(data[col][i]) == std::end(mapOfCountersTrue)){
       mapOfCountersTrue[data[col][i]] = counterTrue;
@@ -185,6 +160,7 @@ tuple<int, double> Calculations::determine_best_threshold_cat(const Data& data, 
     double gini_true = gini(n.second, nTrue);
     double gini_false = gini(mapOfCountersFalse.at(n.first), nFalse);
     double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
+    std::cout << "Categorical gini: " << gini_part << std::endl;
     if(gini_part < best_loss){
       best_loss = gini_part;
       best_thresh = n.first;

@@ -6,7 +6,6 @@
 
 #include "DecisionTree.hpp"
 #include "Calculations.hpp"
-#include <fstream>
 
 using std::make_shared;
 using std::shared_ptr;
@@ -27,12 +26,9 @@ const Node DecisionTree::buildTree(const Data& cols, const MetaData& meta) {
   }
   else {
     auto [true_rows, false_rows] = Calculations::partition(cols, question);
-    // Write logs to file
-    std::ofstream logFile;
-    logFile.open("numeric_logs.txt", std::ios_base::app);
 
-    logFile << question.toString(meta) << std::endl;
-    logFile << "True branch: " << true_rows[0].size() << ", False branch: " << false_rows[0].size() << std::endl;
+    std::cout << question.toString(meta) << std::endl;
+    std::cout << "True branch: " << true_rows[0].size() << ", False branch: " << false_rows[0].size() << std::endl;
     Node trueBranch = buildTree(true_rows, meta);
     true_rows.clear();
     Node falseBranch = buildTree(false_rows, meta);
