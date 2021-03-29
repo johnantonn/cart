@@ -7,7 +7,6 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-#include <fstream>
 #include "Calculations.hpp"
 #include "Utils.hpp"
 
@@ -85,20 +84,6 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   ClassCounter clsCntTrue, clsCntFalse;
   clsCntTrue = classCounts(fData);
 
-  // Write logs to file
-  std::ofstream logFile;
-  logFile.open("numeric_logs.txt", std::ios_base::app);
-
-  logFile << "Feature values (sorted):" << std::endl;
-  for(int i=0; i<N; i++){
-    logFile << fData[i][0] << ", ";
-  }
-
-  logFile << "\nClass counters: " << std::endl;
-  for(const auto& n : clsCntTrue) {
-    logFile << "Key:[" << n.first << "] Value:[" << n.second << "]\n";
-  }
-
   // Update class counters and compute gini
   int nTrue = N;
   for(int i=0; i<N-1; i++){
@@ -110,26 +95,19 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
     } else {
       clsCntFalse[decision] += 1;
     }
-    
-    // Write to log
-    logFile << "Class counters, i=" << i << std::endl;
-    for(const auto& n : clsCntTrue) {
-      logFile << "Key:[" << n.first << "] Value:[" << n.second << "]" << std::endl;
-    }
 
     if(fData[i][0] < fData[i+1][0]){
       int nFalse = N - nTrue;
       double gini_true = gini(clsCntTrue, nTrue);
       double gini_false = gini(clsCntFalse, nFalse);
       double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
-      std::cout << "gini_part: " << gini_part << std::endl;
+      std::cout << "Numerical gini: " << gini_part << std::endl;
       if(gini_part < best_loss){
         best_loss = gini_part;
         best_thresh = fData[i+1][0];
       }
     }
   }
-  logFile.close();
   return forward_as_tuple(best_thresh, best_loss);
 }
 
@@ -172,6 +150,7 @@ tuple<int, double> Calculations::determine_best_threshold_cat(const Data& data, 
     double gini_true = gini(n.second, nTrue);
     double gini_false = gini(mapOfCountersFalse.at(n.first), nFalse);
     double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
+    std::cout << "Categorical gini: " << gini_part << std::endl;
     if(gini_part < best_loss){
       best_loss = gini_part;
       best_thresh = n.first;
