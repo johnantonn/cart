@@ -28,8 +28,8 @@ const Node DecisionTree::buildTree(const Data& cols, const MetaData& meta) {
   }
   else {
     auto [true_rows, false_rows] = Calculations::partition(cols, question);
-    std::cout << question.toString(meta) << std::endl;
-    std::cout << "True branch: " << true_rows[0].size() << ", False branch: " << false_rows[0].size() << std::endl;
+    // std::cout << question.toString(meta) << std::endl;
+    // std::cout << "True branch: " << true_rows[0].size() << ", False branch: " << false_rows[0].size() << std::endl;
     auto retTrue = std::async(&DecisionTree::buildTree, this, true_rows, meta);
     auto retFalse = std::async(&DecisionTree::buildTree, this, false_rows, meta);
     Node trueBranch = retTrue.get();

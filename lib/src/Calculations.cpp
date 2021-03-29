@@ -39,13 +39,13 @@ tuple<Data, Data> Calculations::partition(const Data& data, const Question& q) {
 tuple<const double, const Question> Calculations::find_best_split(const Data& cols, const MetaData& meta) {
   double best_gain = 0.0;  // keep track of the best information gain
   Question best_question;  // keep track of the feature / value that produced it
-  int lastIdx = cols.size()-1;
+  int m = cols.size();
   int N = cols[0].size();
   // Unsplit node gini
-  ClassCounter clsCounter = classCounts(cols[lastIdx]);
+  ClassCounter clsCounter = classCounts(cols[m-1]);
   double gini_node = gini(clsCounter, N);
   // Best split for each feature
-  for(size_t f=0; f<lastIdx; f++){
+  for(size_t f=0; f<m-1; f++){
     tuple<int, double> best_threshold;
     if (meta.types[f] == "NUMERIC"){
       best_threshold = determine_best_threshold_numeric(cols, f);
@@ -75,44 +75,39 @@ const double Calculations::gini(const ClassCounter& counts, double N) {
 }
 
 tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& data, int col) {
-  VecI fVec, cVec;
   double best_loss = std::numeric_limits<float>::infinity();
   int m = data.size();
   int N = data[0].size();
   int best_thresh;
 
-  // Construct the subset of feature and class columns
-  fVec = data[col]; //attr
-  cVec = data[m-1]; //class
-
   // Sort mapping
   std::vector<std::size_t> index(N);
   std::iota(index.begin(), index.end(), 0);
-  std::sort(index.begin(), index.end(), [&](size_t a, size_t b) { return fVec[a] < fVec[b]; });
+  std::sort(index.begin(), index.end(), [&](size_t a, size_t b) { return data[col][a] < data[col][b]; });
 
   // Initialize class counters
   ClassCounter clsCntTrue, clsCntFalse;
-  clsCntTrue = classCounts(cVec);
+  clsCntTrue = classCounts(data[m-1]);
   
   // Update class counters and compute gini
   int nTrue = N;
   for(int i=0; i<N; i++){
     nTrue--;
-    int decision = cVec[index[i]];
+    int decision = data[m-1][index[i]];
     clsCntTrue.at(decision)--;
     if (clsCntFalse.find(decision) != std::end(clsCntFalse)) {
       clsCntFalse.at(decision)++;
     } else {
       clsCntFalse[decision] += 1;
     }
-    if(i < N-1 && fVec[index[i]] < fVec[index[i+1]]){
+    if(i < N-1 && data[col][index[i]] < data[col][index[i+1]]){
       int nFalse = N - nTrue;
       double gini_true = gini(clsCntTrue, nTrue);
       double gini_false = gini(clsCntFalse, nFalse);
       double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
       if(gini_part < best_loss){
         best_loss = gini_part;
-        best_thresh = fVec[index[i+1]];
+        best_thresh = data[col][index[i+1]];
       }
     }
   }
@@ -124,6 +119,7 @@ tuple<int, double> Calculations::determine_best_threshold_cat(const Data& data, 
   int best_thresh;
   int N = data[0].size();
   int m = data.size();
+
   // Initialize class counters
   ClassCounter counterTrue;
   ClassCounter counterFalse = classCounts(data[m-1]);;
