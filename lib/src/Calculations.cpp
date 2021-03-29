@@ -122,6 +122,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
       double gini_true = gini(clsCntTrue, nTrue);
       double gini_false = gini(clsCntFalse, nFalse);
       double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
+      std::cout << "gini_part: " << gini_part << std::endl;
       if(gini_part < best_loss){
         best_loss = gini_part;
         best_thresh = fData[i+1][0];
