@@ -32,7 +32,7 @@ void Bagging::buildBag() {
     int count = N;
     while(count-- > 0){
       int idx = unii(random_number_generator);
-      for(int i=0; i<m; i++){
+      for(size_t i=0; i<m; i++){
         data[i].emplace_back(dr_.trainData()[i][idx]);
       }
     }

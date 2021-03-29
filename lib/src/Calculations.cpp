@@ -99,7 +99,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   
   // Update class counters and compute gini
   int nTrue = N;
-  for(int i=0; i<N-1; i++){
+  for(size_t i=0; i<N-1; i++){
     nTrue--;
     int decision = cVec[index[i]];
     clsCntTrue.at(decision)--;
