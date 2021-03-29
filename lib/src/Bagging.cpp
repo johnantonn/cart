@@ -23,14 +23,18 @@ Bagging::Bagging(const DataReader& dr, const int ensembleSize, uint seed) :
 void Bagging::buildBag() {
   cpu_timer timer;
   std::vector<double> timings;
-  int N = dr_.trainData().size();
+  int N = dr_.trainData()[0].size();
+  int m = dr_.trainData().size();
   std::uniform_int_distribution<int> unii(0, N-1);
   for (int i = 0; i < ensembleSize_; i++) {
     timer.start();
-    Data data;
+    Data data = std::vector<std::vector<int>>(m, std::vector<int>({}));
     int count = N;
     while(count-- > 0){
-      data.emplace_back(dr_.trainData()[unii(random_number_generator)]);
+      int idx = unii(random_number_generator);
+      for(int i=0; i<m; i++){
+        data[i].emplace_back(dr_.trainData()[i][idx]);
+      }
     }
     dr_.setBaggingData(data);
     DecisionTree dt(dr_);
