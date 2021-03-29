@@ -68,27 +68,30 @@ const double Calculations::gini(const ClassCounter& counts, double N) {
 }
 
 tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& data, int col) {
+  Data fData;
   double best_loss = std::numeric_limits<float>::infinity();
   int N = data.size();
   int m = data[0].size();
   int best_thresh;
-
-  // Sort indexes based on values
-  std::vector<std::size_t> index(N);
-  std::iota(index.begin(), index.end(), 0);
-  std::sort(index.begin(), index.end(), [&](size_t a, size_t b) { return data[a][col] < data[b][col]; });
-
+  // Construct the subset of feature and class columns
+  for(int i=0; i<N; i++){
+    fData.push_back({data[i][col], data[i][m-1]});
+  };
+  // Sort based on ordinal feature
+  std::sort(fData.begin(), fData.end(), [](VecI& a, VecI& b) {
+    return a[0] < b[0];
+  });
   // Initialize class counters
   ClassCounter clsCntTrue, clsCntFalse;
-  clsCntTrue = classCounts(data);
+  clsCntTrue = classCounts(fData);
 
   // Write logs to file
   std::ofstream logFile;
   logFile.open("numeric_logs.txt", std::ios_base::app);
 
-  logFile << "\nFeature values (sorted):" << std::endl;
-  for(auto i: index){
-    logFile << data[i][col] << ", ";
+  logFile << "Feature values (sorted):" << std::endl;
+  for(int i=0; i<N; i++){
+    logFile << fData[i][0] << ", ";
   }
 
   logFile << "\nClass counters: " << std::endl;
@@ -98,9 +101,9 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
 
   // Update class counters and compute gini
   int nTrue = N;
-  for(auto i: index){
+  for(int i=0; i<N-1; i++){
     nTrue--;
-    int decision = data[i][m-1];
+    int decision = fData[i][1];
     clsCntTrue.at(decision)--;
     if (clsCntFalse.find(decision) != std::end(clsCntFalse)) {
       clsCntFalse.at(decision)++;
@@ -114,7 +117,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
       logFile << "Key:[" << n.first << "] Value:[" << n.second << "]" << std::endl;
     }
 
-    if(i < N-1 && data[i][col] < data[i+1][col]){
+    if(fData[i][0] < fData[i+1][0]){
       int nFalse = N - nTrue;
       double gini_true = gini(clsCntTrue, nTrue);
       double gini_false = gini(clsCntFalse, nFalse);
@@ -122,7 +125,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
       std::cout << "gini_part: " << gini_part << std::endl;
       if(gini_part < best_loss){
         best_loss = gini_part;
-        best_thresh = data[i+1][col];
+        best_thresh = fData[i+1][0];
       }
     }
   }
