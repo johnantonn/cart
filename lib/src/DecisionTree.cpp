@@ -3,6 +3,8 @@
  * Proprietary, do not copy or distribute without permission. 
  * Written by Pieter Robberechts, 2019
  */
+#include<thread>
+#include<future>
 
 #include "DecisionTree.hpp"
 #include "Calculations.hpp"
@@ -26,13 +28,12 @@ const Node DecisionTree::buildTree(const Data& cols, const MetaData& meta) {
   }
   else {
     auto [true_rows, false_rows] = Calculations::partition(cols, question);
-
     std::cout << question.toString(meta) << std::endl;
     std::cout << "True branch: " << true_rows[0].size() << ", False branch: " << false_rows[0].size() << std::endl;
-    Node trueBranch = buildTree(true_rows, meta);
-    true_rows.clear();
-    Node falseBranch = buildTree(false_rows, meta);
-    false_rows.clear();
+    auto retTrue = std::async(&DecisionTree::buildTree, this, true_rows, meta);
+    auto retFalse = std::async(&DecisionTree::buildTree, this, false_rows, meta);
+    Node trueBranch = retTrue.get();
+    Node falseBranch = retFalse.get();
     return Node(trueBranch, falseBranch, question);
   }
 }
