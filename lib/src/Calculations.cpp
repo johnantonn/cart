@@ -41,9 +41,11 @@ tuple<const double, const Question> Calculations::find_best_split(const Data& co
   Question best_question;  // keep track of the feature / value that produced it
   int m = cols.size();
   int N = cols[0].size();
+
   // Unsplit node gini
   ClassCounter clsCounter = classCounts(cols[m-1]);
   double gini_node = gini(clsCounter, N);
+
   // Best split for each feature
   for(size_t f=0; f<m-1; f++){
     tuple<int, double> best_threshold;
@@ -63,6 +65,7 @@ tuple<const double, const Question> Calculations::find_best_split(const Data& co
       best_question = Question(f, std::get<0>(best_threshold), meta);
     }
   }
+
   return forward_as_tuple(best_gain, best_question);
 }
 
@@ -96,7 +99,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   
   // Update class counters and compute gini
   int nTrue = N;
-  for(int i=0; i<N; i++){
+  for(int i=0; i<N-1; i++){
     nTrue--;
     int decision = cVec[index[i]];
     clsCntTrue.at(decision)--;
@@ -105,7 +108,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
     } else {
       clsCntFalse[decision] += 1;
     }
-    if(i < N-1 && fVec[index[i]] < fVec[index[i+1]]){
+    if(fVec[index[i]] < fVec[index[i+1]]){
       int nFalse = N - nTrue;
       double gini_true = gini(clsCntTrue, nTrue);
       double gini_false = gini(clsCntFalse, nFalse);
@@ -124,11 +127,13 @@ tuple<int, double> Calculations::determine_best_threshold_cat(const Data& data, 
   int best_thresh;
   int N = data[0].size();
   int m = data.size();
+
   // Initialize class counters
   ClassCounter counterTrue;
   ClassCounter counterFalse = classCounts(data[m-1]);;
   std::unordered_map<int, ClassCounter> mapOfCountersTrue;
   std::unordered_map<int, ClassCounter> mapOfCountersFalse;
+
   for(size_t i=0; i<N; i++){
     int decision = data[m-1][i];
     // Check (create) class counter for true set
