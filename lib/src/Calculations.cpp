@@ -96,25 +96,23 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   
   // Update class counters and compute gini
   int nTrue = N;
-  for(auto i : index){
+  for(int i=0; i<N; i++){
     nTrue--;
-    int decision = cVec[i];
+    int decision = cVec[index[i]];
     clsCntTrue.at(decision)--;
     if (clsCntFalse.find(decision) != std::end(clsCntFalse)) {
       clsCntFalse.at(decision)++;
     } else {
       clsCntFalse[decision] += 1;
     }
-
-    if(i<N-1 && fVec[i] < fVec[i+1]){
+    if(i < N-1 && fVec[index[i]] < fVec[index[i+1]]){
       int nFalse = N - nTrue;
       double gini_true = gini(clsCntTrue, nTrue);
       double gini_false = gini(clsCntFalse, nFalse);
       double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
-      std::cout << "Numerical gini: " << gini_part << std::endl;
       if(gini_part < best_loss){
         best_loss = gini_part;
-        best_thresh = fVec[i+1];
+        best_thresh = fVec[index[i+1]];
       }
     }
   }
@@ -160,7 +158,6 @@ tuple<int, double> Calculations::determine_best_threshold_cat(const Data& data, 
     double gini_true = gini(n.second, nTrue);
     double gini_false = gini(mapOfCountersFalse.at(n.first), nFalse);
     double gini_part = gini_true*((double) nTrue/N) + gini_false*((double) nFalse/N);
-    std::cout << "Categorical gini: " << gini_part << std::endl;
     if(gini_part < best_loss){
       best_loss = gini_part;
       best_thresh = n.first;
