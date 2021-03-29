@@ -33,7 +33,9 @@ const Node DecisionTree::buildTree(const Data& cols, const MetaData& meta) {
     auto retTrue = std::async(&DecisionTree::buildTree, this, true_rows, meta);
     auto retFalse = std::async(&DecisionTree::buildTree, this, false_rows, meta);
     Node trueBranch = retTrue.get();
+    true_rows.clear();
     Node falseBranch = retFalse.get();
+    false_rows.clear();
     return Node(trueBranch, falseBranch, question);
   }
 }
