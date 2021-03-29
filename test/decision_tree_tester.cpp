@@ -13,7 +13,7 @@ int main() {
 
   DataReader dr(d);
   DecisionTree dt(dr);
-  dt.print();
+  //dt.print();
   dt.test();
   return 0;
 }
