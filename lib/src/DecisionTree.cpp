@@ -3,8 +3,8 @@
  * Proprietary, do not copy or distribute without permission. 
  * Written by Pieter Robberechts, 2019
  */
-#include<thread>
-#include<future>
+#include <thread>
+#include <future>
 
 #include "DecisionTree.hpp"
 #include "Calculations.hpp"
