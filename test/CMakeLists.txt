@@ -3,10 +3,10 @@ project(Test)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# find_package(DecisionTree 0.1 REQUIRED)
-# if(DecisionTree_FOUND)
-#     message("-- DecisionTree version: ${DecisionTree_VERSION}")
-# endif()
+find_package(DecisionTree 0.1 REQUIRED)
+if(DecisionTree_FOUND)
+        message("-- DecisionTree version: ${DecisionTree_VERSION}")
+endif()
 
 
 find_package(Threads REQUIRED)
@@ -22,10 +22,10 @@ set (FILES
         ../lib/src/Calculations.cpp
         ../lib/src/TreeTest.cpp)
 
-# add_executable(ImportTest import_test.cpp)
-# target_include_directories(ImportTest PUBLIC ../lib/include ${Boost_INCLUDE_DIRS})
-# target_compile_options(ImportTest PRIVATE -Wall -Weffc++ -Wpedantic)
-# target_link_libraries(ImportTest DecisionTree Threads::Threads ${Boost_LIBRARIES})
+add_executable(ImportTest import_test.cpp)
+target_include_directories(ImportTest PUBLIC ../lib/include ${Boost_INCLUDE_DIRS})
+target_compile_options(ImportTest PRIVATE -Wall -Weffc++ -Wpedantic)
+target_link_libraries(ImportTest DecisionTree Threads::Threads ${Boost_LIBRARIES})
 
 
 add_executable(DecisionTreeTest decision_tree_tester.cpp ${FILES})

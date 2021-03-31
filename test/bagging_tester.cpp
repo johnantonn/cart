@@ -11,7 +11,7 @@ int main() {
   d.train.filename = "../data/covtype.arff";
   d.test.filename = "../data/covtype_test.arff";
 
-  Bagging bc(d, 5);
+  Bagging bc(d, 1);
   bc.test();
   return 0;
 }
