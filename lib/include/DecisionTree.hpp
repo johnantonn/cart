@@ -30,7 +30,7 @@ class DecisionTree {
     DataReader dr_;
 
     const Node buildTree(const Data& cols, const MetaData &meta);
-    void print(const std::shared_ptr<Node> root, std::string spacing="") const;
+    void print(const std::shared_ptr<Node> root, const MetaData& meta, std::string spacing="") const;
 
 };
 

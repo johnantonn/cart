@@ -30,11 +30,10 @@ void TreeTest::printLeaf(ClassCounter counts, const MetaData& meta) const {
   ClassCounterScaled scale;
 
   for (const auto& [key, val]: counts){
-      std::string sKey = meta.dMapIS.at(meta.labels[meta.labels.size()-1]).at(key);
-      scale[sKey] = std::to_string(val / total * 100) + "%";
+      scale[key] = std::to_string(val / total * 100) + "%";
     }
 
-  Utils::print::print_map(scale);
+  Utils::print::print_map(scale, meta);
 }
 
 void TreeTest::test(const Data& testData, const MetaData& meta, shared_ptr<Node> tree) const {

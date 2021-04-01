@@ -41,22 +41,22 @@ const Node DecisionTree::buildTree(const Data& cols, const MetaData& meta) {
 }
 
 void DecisionTree::print() const {
-  print(make_shared<Node>(root_));
+  print(make_shared<Node>(root_), dr_.metaData());
 }
 
-void DecisionTree::print(const shared_ptr<Node> root, string spacing) const {
+void DecisionTree::print(const shared_ptr<Node> root, const MetaData& meta, string spacing) const {
   if (bool is_leaf = root->leaf() != nullptr; is_leaf) {
     const auto &leaf = root->leaf();
-    std::cout << spacing + "Predict: "; Utils::print::print_map(leaf->predictions());
+    std::cout << spacing + "Predict: "; Utils::print::print_map(leaf->predictions(), meta);
     return;
   }
   std::cout << spacing << root->question().toString(dr_.metaData()) << "\n";
 
   std::cout << spacing << "--> True: " << "\n";
-  print(root->trueBranch(), spacing + "   ");
+  print(root->trueBranch(), meta, spacing + "   ");
 
   std::cout << spacing << "--> False: " << "\n";
-  print(root->falseBranch(), spacing + "   ");
+  print(root->falseBranch(), meta, spacing + "   ");
 }
 
 void DecisionTree::test() const {

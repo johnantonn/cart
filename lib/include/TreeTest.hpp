@@ -10,7 +10,7 @@
 #include "Node.hpp"
 #include "Utils.hpp"
 
-using ClassCounterScaled = std::unordered_map<std::string, std::string>;
+using ClassCounterScaled = std::unordered_map<int, std::string>; // changed to int (hash)
 
 class TreeTest {
   public:
