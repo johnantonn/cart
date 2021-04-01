@@ -27,13 +27,12 @@ target_include_directories(ImportTest PUBLIC ../lib/include ${Boost_INCLUDE_DIRS
 target_compile_options(ImportTest PRIVATE -Wall -Weffc++ -Wpedantic)
 target_link_libraries(ImportTest DecisionTree Threads::Threads ${Boost_LIBRARIES})
 
-
-add_executable(DecisionTreeTest decision_tree_tester.cpp ${FILES})
+add_executable(DecisionTreeTest decision_tree_tester.cpp)
 target_compile_options(DecisionTreeTest PRIVATE -Wall -Weffc++ -Wpedantic)
 target_include_directories(DecisionTreeTest PUBLIC ../lib/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(DecisionTreeTest Threads::Threads ${Boost_LIBRARIES})
+target_link_libraries(DecisionTreeTest DecisionTree Threads::Threads ${Boost_LIBRARIES})
 
-add_executable(BaggingTest bagging_tester.cpp ${FILES})
+add_executable(BaggingTest bagging_tester.cpp)
 target_compile_options(BaggingTest PRIVATE -Wall -Weffc++ -Wpedantic)
 target_include_directories(BaggingTest PUBLIC ../lib/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(BaggingTest Threads::Threads ${Boost_LIBRARIES})
+target_link_libraries(BaggingTest DecisionTree DecisionTree Threads::Threads ${Boost_LIBRARIES})

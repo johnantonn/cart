@@ -4,14 +4,14 @@
  * Written by Pieter Robberechts, 2019
  */
 
-#include "../lib/include/Bagging.hpp"
+#include <DecisionTree/Bagging.hpp>
 
 int main() {
   Dataset d;
   d.train.filename = "../data/covtype.arff";
   d.test.filename = "../data/covtype_test.arff";
 
-  Bagging bc(d, 1);
+  Bagging bc(d, 5);
   bc.test();
   return 0;
 }

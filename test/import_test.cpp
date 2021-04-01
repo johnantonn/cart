@@ -4,13 +4,13 @@
  * Written by Pieter Robberechts, 2019
  */
 
-#include <DecisionTree/DecisionTree.hpp>
+#include <DecisionTree/DataReader.hpp>
 
 int main(void) {
   Dataset d;
   d.train.filename = "../data/covtype.arff";
   d.test.filename = "../data/covtype_test.arff";
 
-  DecisionTree dt(d);
+  DataReader dr(d);
   return 0;
 }
