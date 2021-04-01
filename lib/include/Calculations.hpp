@@ -31,10 +31,6 @@ std::tuple<int, double> determine_best_threshold_cat(const Data &data, int col);
 
 const ClassCounter classCounts(const VecI& classVec);
 
-void zip(const std::vector<int> &a, const std::vector<int> &b, std::vector<std::pair<int,int>> &zipped);
-
-void unzip(const std::vector<std::pair<int, int>> &zipped, std::vector<int> &a, std::vector<int> &b);
-
 } // namespace Calculations
 
 #endif //DECISIONTREE_CALCULATIONS_HPP

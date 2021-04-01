@@ -7,12 +7,19 @@
 #include <DecisionTree/DecisionTree.hpp>
 
 int main() {
+  // Dataset
   Dataset d;
   d.train.filename = "../data/covtype.arff";
   d.test.filename = "../data/covtype_test.arff";
 
+  // Construct the decision tree
   DecisionTree dt(d);
+
+  // Print the decision tree
   //dt.print();
+
+  // Test
   dt.test();
+
   return 0;
 }

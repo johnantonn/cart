@@ -42,7 +42,7 @@ void TreeTest::test(const Data& testData, const MetaData& meta, shared_ptr<Node>
   for (const auto& row: testData) {
     const auto& classification = classify(row, tree);
     static size_t last = row.size() - 1;
-    // Comment out this line to print the predicion of each example
+    // Comment out this line to print the predicion of each example (changed due to mapping of strings to ints)
     // std::cout << "Actual: " << meta.dMapIS.at(meta.labels[meta.labels.size()-1]).at(row[last]) << "\tPrediction: "; printLeaf(classification, meta);
     if (Utils::tree::getMax(classification) == row[last])
       accuracy += 1;

@@ -18,16 +18,16 @@
 #include <boost/timer/timer.hpp>
 
 
-// You can change these data type aliases
+// Changes and additions
 using VecS = std::vector<std::string>;
-using VecI = std::vector<int>;
-using Data = std::vector<std::vector<int>>;
-using MapIS = std::unordered_map<int, std::string>;
-using DMapIS = std::unordered_map<std::string, MapIS>;
+using VecI = std::vector<int>; // vector of ints
+using Data = std::vector<std::vector<int>>; // changed due to mapping of strings to ints
+using MapIS = std::unordered_map<int, std::string>; // mapping of hash values to original strings
+using DMapIS = std::unordered_map<std::string, MapIS>; // mapping of attr names to MapIS
 struct MetaData {
   VecS labels;
   VecS types;
-  DMapIS dMapIS; // mapping of hashes to original string values
+  DMapIS dMapIS; // mapping of hash values to original strings
 };
 
 

@@ -20,6 +20,7 @@ using std::unordered_map;
 tuple<Data, Data> Calculations::partition(const Data& data, const Question& q) {
   Data true_cols = Data(data.size(),std::vector<int>({}));
   Data false_cols = Data(data.size(),std::vector<int>({}));
+  // Logic changed due to transposition of trainData_
   for (int i=0; i<data[q.column_].size(); i++) {
     if (q.solve(data[q.column_][i])){
       for(size_t j=0; j<data.size(); j++){
@@ -37,12 +38,12 @@ tuple<Data, Data> Calculations::partition(const Data& data, const Question& q) {
 }
 
 tuple<const double, const Question> Calculations::find_best_split(const Data& cols, const MetaData& meta) {
-  double best_gain = 0.0;  // keep track of the best information gain
-  Question best_question;  // keep track of the feature / value that produced it
-  int m = cols.size();
-  int N = cols[0].size();
+  double best_gain = 0.0; // keep track of the best information gain
+  Question best_question; // keep track of the feature / value that produced it
+  int m = cols.size(); // number of columns
+  int N = cols[0].size(); // number of rows
 
-  // Unsplit node gini
+  // Node's initial Gini
   ClassCounter clsCounter = classCounts(cols[m-1]);
   double gini_node = gini(clsCounter, N);
 
@@ -97,7 +98,7 @@ tuple<int, double> Calculations::determine_best_threshold_numeric(const Data& da
   ClassCounter clsCntTrue, clsCntFalse;
   clsCntTrue = classCounts(cVec);
   
-  // Update class counters and compute gini
+  // Update class counters and compute Gini
   int nTrue = N;
   for(size_t i=0; i<N-1; i++){
     nTrue--;
@@ -136,11 +137,11 @@ tuple<int, double> Calculations::determine_best_threshold_cat(const Data& data, 
 
   for(size_t i=0; i<N; i++){
     int decision = data[m-1][i];
-    // Check (create) class counter for true set
+    // Check/create class counter for true set
     if(mapOfCountersTrue.find(data[col][i]) == std::end(mapOfCountersTrue)){
       mapOfCountersTrue[data[col][i]] = counterTrue;
     }
-    // Check (create) class counter for false set
+    // Check/create class counter for false set
     if(mapOfCountersFalse.find(data[col][i]) == std::end(mapOfCountersFalse)){
       mapOfCountersFalse[data[col][i]] = counterFalse;
     }
@@ -153,7 +154,7 @@ tuple<int, double> Calculations::determine_best_threshold_cat(const Data& data, 
     }
   }
 
-  // Compute gini for each value
+  // Compute Gini for the different categorical values
   for(const auto& n: mapOfCountersTrue) {
     int nTrue = 0;
     for(const auto& m: mapOfCountersTrue.at(n.first)) {

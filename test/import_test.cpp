@@ -7,10 +7,13 @@
 #include <DecisionTree/DataReader.hpp>
 
 int main(void) {
+  // Dataset
   Dataset d;
   d.train.filename = "../data/covtype.arff";
   d.test.filename = "../data/covtype_test.arff";
 
+  // Import dataset
   DataReader dr(d);
+
   return 0;
 }

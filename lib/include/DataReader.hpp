@@ -35,7 +35,9 @@ class DataReader
     inline const Data& testData() const { return testData_; }
     inline const MetaData& metaData() const { return trainMetaData_; }
 
+    // Backs up the original training dataset and sets the newly created one
     inline const void setBaggingData(Data &data){  backupTrainData_=trainData_; trainData_=data;}
+    // Resets the original training dataset and deletes the newly created one
     inline const void resetBaggingData(){ trainData_=backupTrainData_; backupTrainData_={};}
 
   private:
@@ -50,11 +52,11 @@ class DataReader
 
     const std::string classLabel_;
     Data trainData_;
-    Data backupTrainData_;
+    Data backupTrainData_; // back up of original dataset; used in bagging
     Data testData_;
     MetaData trainMetaData_;
     MetaData testMetaData_;
-    DMapIS dMapIS_;
+    DMapIS dMapIS_; // mapping of strings to int hashes
 
 };
 

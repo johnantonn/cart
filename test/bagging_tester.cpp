@@ -7,11 +7,16 @@
 #include <DecisionTree/Bagging.hpp>
 
 int main() {
+  // Dataset
   Dataset d;
   d.train.filename = "../data/covtype.arff";
   d.test.filename = "../data/covtype_test.arff";
 
+  // Construct the ensemble model
   Bagging bc(d, 5);
+
+  // Test
   bc.test();
+
   return 0;
 }

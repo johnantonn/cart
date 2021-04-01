@@ -51,7 +51,7 @@ void DataReader::processFileTraining(const std::string& filename, Data& data, Me
   while (getline(file, line)) {
     if (!header_loaded) {
       parseHeaderLine(line, meta, header_loaded);
-      data = std::vector<std::vector<int>>(meta.labels.size(),std::vector<int>({}));
+      data = std::vector<std::vector<int>>(meta.labels.size(),std::vector<int>({})); // initialize training data matrix (transpose)
     } else {
       parseDataLine(line, data, meta, "training");
     }
@@ -166,18 +166,18 @@ bool DataReader::parseDataLine(const std::string &line, Data &data, MetaData &me
     if(meta.types[i]=="NUMERIC"){
       // Convert to int
       if(type=="training")
-        data[i].push_back(std::stod(vecS[i]));
+        data[i].push_back(std::stod(vecS[i])); // transpose
       else
-        vecI.push_back(std::stod(vecS[i]));
+        vecI.push_back(std::stod(vecS[i])); // non-transpose
     }
     else if(meta.types[i]=="CATEGORICAL"){
       // Hash
       int hash = hasher(vecS[i]);
       if(type=="training")
-        data[i].push_back(hash);
+        data[i].push_back(hash); // transpose
       else
-        vecI.push_back(hash);
-      // Store the mapping
+        vecI.push_back(hash); // non-transpose
+      // Store the hash-string mapping
       if(meta.dMapIS.find(meta.labels[i]) == std::end(meta.dMapIS)){
         meta.dMapIS[meta.labels[i]] = mapIS;
       }
@@ -190,7 +190,7 @@ bool DataReader::parseDataLine(const std::string &line, Data &data, MetaData &me
     }
   }
 
-  // Store line to data object
+  // Store line to test data object (non-transpose)
   if(type=="testing")
     data.emplace_back(std::move(vecI));
 

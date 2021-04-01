@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
-// You can change these data types
+// Changed string to int
 using Data = std::vector<std::vector<int>>;
 using ClassCounter = std::unordered_map<int, int>;
 

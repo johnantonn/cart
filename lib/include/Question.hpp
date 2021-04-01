@@ -22,15 +22,15 @@ class Question {
     Question(const int column, const int value, const MetaData& meta);
 
     inline const bool isNumeric() const {return isNumeric_;};
-    const bool solve(int val) const;
-    const bool solve(VecI example) const;
+    const bool solve(int val) const; // changed to int; for training
+    const bool solve(VecI example) const; // changed to vector of ints; for test
     const std::string toString(const MetaData& meta) const;
 
     int column_;
-    int value_;
+    int value_; // changed to int
     
   private:
-    bool isNumeric_;
+    bool isNumeric_; // true if the feature to split on is numeric
 
 };
 

@@ -25,21 +25,29 @@ void Bagging::buildBag() {
   std::vector<double> timings;
   int N = dr_.trainData()[0].size();
   int m = dr_.trainData().size();
+  // Uniform distribution of integers
   std::uniform_int_distribution<int> unii(0, N-1);
+  // Loop over ensemble size
   for (int i = 0; i < ensembleSize_; i++) {
     timer.start();
+    // New data matrix
     Data data = std::vector<std::vector<int>>(m, std::vector<int>({}));
     int count = N;
     while(count-- > 0){
+      // Index to sample
       int idx = unii(random_number_generator);
+      // Due to transposition of trainData_
       for(size_t i=0; i<m; i++){
         data[i].emplace_back(dr_.trainData()[i][idx]);
       }
     }
+    // Backup up original dataset
     dr_.setBaggingData(data);
+    // Build decision tree on the new dataset
     DecisionTree dt(dr_);
     //dt.print();
     learners_.push_back(dt);
+    // Reset the original dataset and delete the newly created one
     dr_.resetBaggingData();
     auto nanoseconds = boost::chrono::nanoseconds(timer.elapsed().wall);
     auto seconds = boost::chrono::duration_cast<boost::chrono::seconds>(nanoseconds);
